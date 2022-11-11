@@ -1,130 +1,92 @@
 #include <Servo.h>
-char Incoming_value=0;
-int servopos=90; //angle for servo motor
-int servo_rest=0; //angle for servo when at rest
-int motorSpeed=255; // motor speed
-int mL_1=2;   // in1 of L298n -> pin 2 of arduino
-int mL_2=3;   // in2 of L298n -> pin 3 of arduino
-int mR_1=4;   // in3 of L298n -> pin 4 of arduino
-int mR_2=5;   // in4 of L298n -> pin 5 of arduino
-int mL_speedpin=9;  // EnA of l298N -> pin 9 of arduino
-int mR_speedpin=10; // EnB of l298n -> pin 10 of arduino
+
+int lft_1=2;
+int lft_2=3;
+int rght_1=4;
+int rght_2=5;
+int lsp=9;
+int rsp=10;
 int servopin=11;
-char front='1'; // character's assighned to each motion recived from bluetooth module
-char right='4';
+char front='1'; 
+char right='3';
 char back='2';
-char left='3';
-char servo='E';
-//int calloff=13;
-char pausee='9';
-int led=6;
-// l-> 1
-// r-> 2
+char left='4';
+char servo='5';
+int servopos=90; 
+int servo_rest=0;
+char Incoming_value;
+
 Servo myservo;
-void forwardmotion(int motor_pin1,int motor_pin2,int speedpin) // this functuon decide motion of a motor(clockwise)
+
+void clockwise(int motor_1,int motor_2,int motorsp,int rpm)
 {
-  
-  analogWrite(speedpin,motorSpeed);
-  digitalWrite(motor_pin1,HIGH);
-  digitalWrite(motor_pin2,LOW);
-  
+  digitalWrite(motor_1,HIGH);
+  digitalWrite(motor_2,LOW);
+  analogWrite(motorsp,rpm);
 }
-
-
-void backwardmotion(int motor_pin1,int motor_pin2,int speedpin) // this functuon decide motion of a motor(anticlockwise)
+void anticlockwise(int motor_1,int motor_2,int motorsp,int rpm)
 {
-  
-  analogWrite(speedpin,motorSpeed);
-  digitalWrite(motor_pin1,LOW);
-  digitalWrite(motor_pin2,HIGH);
-  
+  digitalWrite(motor_1,LOW);
+  digitalWrite(motor_2,HIGH);
+  analogWrite(motorsp,rpm);
 }
-
-
-void forward(int motor1_1,int motor1_2,int motor2_1,int motor2_2,int speedpin1,int speedpin2) // this function moves bot in forward direction
+void Forward(int lft_1,int lft_2,int rght_1,int rght_2,int lsp,int rsp)
 {
-  
-  forwardmotion(motor1_1,motor1_2,speedpin1);
-  forwardmotion(motor2_1,motor2_2,speedpin2);
-  
+    int rpm=255;
+    clockwise(lft_1,lft_2,lsp,rpm);
+    clockwise(rght_1,rght_2,rsp,rpm);
 }
-
-
-void backward(int motor1_1,int motor1_2,int motor2_1,int motor2_2,int speedpin1,int speedpin2) // this function moves bot in backward direction
+void Backward(int lft_1,int lft_2,int rght_1,int rght_2,int lsp,int rsp)
 {
-  
-  backwardmotion(motor1_1,motor1_2,speedpin1);
-  backwardmotion(motor2_1,motor2_2,speedpin2);
-  
+    int rpm=255;
+    anticlockwise(lft_1,lft_2,lsp,rpm);
+    anticlockwise(rght_1,rght_2,rsp,rpm);
 }
-
-
-void leftward(int motor1_1,int motor1_2,int motor2_1,int motor2_2,int speedpin1,int speedpin2) // this function moves bot in leftward direction
+void Leftward(int lft_1,int lft_2,int rght_1,int rght_2,int lsp,int rsp)
 {
-  
-  //backwardmotion(motor1_1,motor1_2,speedpin1);
-  forwardmotion(motor2_1,motor2_2,speedpin2);
-  
+    int rpm=255;
+    clockwise(rght_1,rght_2,rsp,rpm);
+    clockwise(lft_1,lft_2,lsp,0);
 }
-
-
-void rightward(int motor1_1,int motor1_2,int motor2_1,int motor2_2,int speedpin1,int speedpin2) // this function moves bot in rightward direction
+void Rightward(int lft_1,int lft_2,int rght_1,int rght_2,int lsp,int rsp)
 {
-  
-  forwardmotion(motor1_1,motor1_2,speedpin1);
-  //backwardmotion(motor2_1,motor2_2,speedpin2);
-  
+    int rpm=255;
+    clockwise(lft_1,lft_2,lsp,rpm);
+    clockwise(rght_1,rght_2,rsp,0);
 }
-
-void pause(int motor1_1,int motor1_2,int motor2_1,int motor2_2,int speedpin1,int speedpin2)
-{
-  digitalWrite(motor1_1,LOW);
-  digitalWrite(motor1_2,LOW);
-  analogWrite(speedpin1,0);
-  digitalWrite(motor2_1,LOW);
-  digitalWrite(motor2_2,LOW);
-  analogWrite(speedpin2,0);
-  
-}
-
-
 void setup() 
 {
-  Serial.begin(9600);         
-  pinMode(mL_1,OUTPUT);
-  pinMode(mL_2,OUTPUT);
-  pinMode(mR_1,OUTPUT);
-  pinMode(mR_2,OUTPUT);
-  pinMode(mL_speedpin,OUTPUT);
-  pinMode(mR_speedpin,OUTPUT);
-  pinMode(servopin,OUTPUT);
-  //pinMode(calloff,INPUT);
-  pinMode(led,OUTPUT);
-  myservo.attach(servopin);
-  myservo.write(servo_rest);
+    pinMode(lft_1,OUTPUT);
+    pinMode(lft_2,OUTPUT);
+    pinMode(rght_1,OUTPUT);
+    pinMode(rght_2,OUTPUT);
+    pinMode(lsp,OUTPUT);
+    pinMode(lsp,OUTPUT);
+    pinMode(servopin,OUTPUT);
+    myservo.attach(servopin);
+    myservo.write(servo_rest);
+    Serial.begin(9600);
 }
-void loop()
+
+void loop() 
 {
-  if(Serial.available() > 0)  
+    if(Serial.available() > 0)  
   {
     Incoming_value = Serial.read();      
     Serial.print(Incoming_value);       
-    Serial.print("\n");       
-    if(Incoming_value == front)            
-      forward(mL_1,mL_2,mR_1,mR_2,mL_speedpin,mR_speedpin); 
-    else if(Incoming_value == back)      
-      backward(mL_1,mL_2,mR_1,mR_2,mL_speedpin,mR_speedpin);   
-    else if(Incoming_value == left)      
-      leftward(mL_1,mL_2,mR_1,mR_2,0,255); 
-    else if(Incoming_value == right)      
-      rightward(mL_1,mL_2,mR_1,mR_2,255,0); 
-    else if (Incoming_value == pausee)
-      pause(mL_1,mL_2,mR_1,mR_2,mL_speedpin,mR_speedpin); 
+    Serial.print("\n");
+    if(Incoming_value== front)
+        Forward(lft_1,lft_2,rght_1,rght_2,lsp,rsp);
+    else if(Incoming_value== left)
+        Leftward(lft_1,lft_2,rght_1,rght_2,lsp,rsp);
+    else if(Incoming_value== right)
+        Rightward(lft_1,lft_2,rght_1,rght_2,lsp,rsp);
+    else if(Incoming_value== back)
+        Backward(lft_1,lft_2,rght_1,rght_2,lsp,rsp);
     else if(Incoming_value == servo)
-      myservo.write(servopos);
-      delay(750);
-      myservo.write(servo_rest);
-    
-  }                            
- 
-}                 
+        myservo.write(servopos);
+        delay(750);
+        myservo.write(servo_rest); 
+  }
+
+}
