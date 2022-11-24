@@ -61,7 +61,7 @@ void setup()
     pinMode(rght_1,OUTPUT);
     pinMode(rght_2,OUTPUT);
     pinMode(lsp,OUTPUT);
-    pinMode(lsp,OUTPUT);
+    pinMode(rsp,OUTPUT);
     pinMode(servopin,OUTPUT);
     myservo.attach(servopin);
     myservo.write(servo_rest);
